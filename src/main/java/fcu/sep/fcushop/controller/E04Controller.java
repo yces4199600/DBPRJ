@@ -59,9 +59,14 @@ public class E04Controller {
 //  }
 
   @PostMapping("/usertakes")
-  public String getTakes(@RequestBody Map params) {
-    String username = params.get("current_user").toString();
-    System.out.println(username);
-    return username;
+  public ResponseEntity<List<CourseList>> getTakes(@RequestBody Map params) {
+    String userid = params.get("current_user").toString();
+    System.out.println(userid);
+    try (Connection connection = sql2oDbHandler.getConnector().open()) {//query語法錯誤
+      String query = "SELECT * FROM course WHERE `Course_ID` IN (SELECT `Course_ID` FROM takes WHERE `Student_ID` = :userid)";
+      List<CourseList> r = connection.createQuery(query).executeAndFetch(CourseList.class);
+      System.out.println(connection.createQuery(query));
+      return ResponseEntity.ok().body(r);
+    }
   }
 }
